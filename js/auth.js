@@ -43,21 +43,45 @@ async function loadUserName() {
     console.error(error);
     return;
   }
- 
-// monstrar nombre
-  const nameEl = document.getElementById("userName");
-  if (nameEl) nameEl.textContent = data.name;
 
-  // mostrar avatar
+  const nameEl = document.getElementById("userName");
+  if (nameEl) nameEl.textContent = data.name ?? "";
+
   const avatarEl = document.getElementById("avatar");
   if (avatarEl) avatarEl.textContent = initialsFromName(data.name, user.email);
 
-    // Mostrar badge admin si role = 1
-if (data.role === 1) {
   const badge = document.getElementById("adminBadge");
-  if (badge) badge.classList.remove("d-none");
+  if (badge && data.role === 1) badge.classList.remove("d-none");
+
+  const link = document.getElementById("adminLink");
+  if (link && data.role === 1) link.classList.remove("d-none");
 }
 
+async function requireAdmin() {
+  const { data } = await supabaseClient.auth.getSession();
+
+  if (!data.session) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  const { data: { user } } = await supabaseClient.auth.getUser();
+
+  const { data: userData, error } = await supabaseClient
+    .from("users")
+    .select("role")
+    .eq("email", user.email)
+    .single();
+
+  if (error || userData.role !== 1) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  document.body.style.display = "block";
+  setTimeout(() => (document.body.style.opacity = "1"), 10);
+
+  await loadUserName();
 }
 
 function initialsFromName(name, email) {
@@ -70,9 +94,12 @@ function initialsFromName(name, email) {
 }
 
 // Router por página (evita loops y ejecuciones indebidas)
+
 document.addEventListener("DOMContentLoaded", () => {
   const page = document.body.dataset.page;
 
   if (page === "protected") requireAuth();
+  if (page === "admin") requireAdmin();
   if (page === "login") redirectIfLoggedIn();
 });
+

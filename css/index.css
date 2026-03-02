@@ -1,0 +1,184 @@
+/* ===== Layout base ===== */
+
+body {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.table-container {
+  overflow-x: auto;
+  max-height: 70vh;
+}
+
+table {
+  font-size: 0.75rem;
+}
+
+th,
+td {
+  white-space: nowrap;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 2;
+}
+
+/* ===== Avatar ===== */
+
+.avatar-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(220, 53, 69, 0.12);
+  color: #dc3545;
+  font-weight: 700;
+  font-size: 0.85rem;
+  user-select: none;
+}
+
+.bi-pencil-square:hover {
+  color: #dc3545;
+  transform: scale(1.1);
+  transition: 0.15s ease;
+}
+
+/* ===== Calendario ===== */
+
+.cal-card {
+  border: 1px solid rgba(108, 117, 125, 0.25);
+  border-radius: 12px;
+  padding: 10px;
+  background: #fff;
+}
+
+.cal-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #212529;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.cal-title .year {
+  font-weight: 600;
+  color: #6c757d;
+  font-size: 0.8rem;
+}
+
+.cal-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 0.72rem;
+}
+
+.cal-table th,
+.cal-table td {
+  text-align: center;
+  padding: 3px 0;
+  border-radius: 6px;
+}
+
+.cal-table th {
+  color: #6c757d;
+  font-weight: 700;
+  font-size: 0.65rem;
+}
+
+.cal-table td.muted {
+  color: rgba(108, 117, 125, 0.55);
+}
+
+.cal-table td.today {
+  background: rgba(220, 53, 69, 0.12);
+  color: #dc3545;
+  font-weight: 800;
+}
+
+/* ===== Scroll calendario ===== */
+
+.cal-scroll {
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+/* ===== Eventos ===== */
+
+.cal-table td.has-event {
+  background: rgba(13, 110, 253, 0.12);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.cal-table td.has-event:hover {
+  outline: 2px solid rgba(13, 110, 253, 0.35);
+}
+
+.cal-table td.selected {
+  outline: 2px solid rgba(220, 53, 69, 0.55);
+  background: rgba(220, 53, 69, 0.12);
+}
+
+
+/* calendar dots */
+
+.cal-table td.has-event {
+  cursor: pointer;
+}
+
+/* contenedor de puntos */
+.event-dots {
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+/* un puntico de color */
+.event-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* right panel */
+
+.event-card .meta {
+  font-size: 0.9rem;
+}
+
+.event-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.12);
+  font-size: 0.78rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.event-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.event-col-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #6c757d;
+  margin-bottom: 6px;
+}

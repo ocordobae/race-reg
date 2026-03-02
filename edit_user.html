@@ -2,7 +2,9 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <title>Editar Perfil</title>
+    <title data-i18n="edit_profile_title">Editar Perfil</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
@@ -13,6 +15,9 @@
     <script src="js/supabaseClient.js"></script>
     <script src="js/auth.js"></script>
 
+    <!-- i18n -->
+    <script src="js/i18n.js"></script>
+
     <style>
       body {
         display: none;
@@ -22,56 +27,171 @@
     </style>
   </head>
 
-  <body data-page="protected" onload="loadCurrentName()">
-    <div class="container mt-5" style="max-width: 400px">
-      <h1 class="h5 mb-4">Editar Nombre</h1>
+  <body data-page="protected">
+    <div class="container mt-5" style="max-width: 420px">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h1 class="h5 mb-0" data-i18n="edit_profile_header">Editar Perfil</h1>
 
-      <input id="nameInput" class="form-control" placeholder="Tu nombre" />
-      <button class="btn btn-danger w-100 mt-3" onclick="saveName()">
-        Guardar
+        <!-- Selector idioma UI (cambia al vuelo) -->
+        <select
+          id="langSelect"
+          class="form-select form-select-sm w-auto"
+          aria-label="Idioma"
+          data-i18n-aria-label="language_aria"
+        >
+          <option value="fr">FR</option>
+          <option value="en">EN</option>
+          <option value="es">ES</option>
+        </select>
+      </div>
+
+      <!-- Nombre -->
+      <label class="form-label" for="nameInput" data-i18n="name_label">
+        Nombre
+      </label>
+      <input
+        id="nameInput"
+        class="form-control"
+        placeholder="Tu nombre"
+        data-i18n-placeholder="name_placeholder"
+      />
+
+      <!-- Idioma por defecto (persistente en DB) -->
+      <label
+        class="form-label mt-3"
+        for="preferredLang"
+        data-i18n="preferred_language_label"
+      >
+        Idioma por defecto
+      </label>
+      <select id="preferredLang" class="form-select">
+        <option value="fr" data-i18n="lang_fr">Français (FR)</option>
+        <option value="en" data-i18n="lang_en">English (EN)</option>
+        <option value="es" data-i18n="lang_es">Español (ES)</option>
+      </select>
+      <div class="form-text" data-i18n="preferred_language_help">
+        Este idioma se usará por defecto cuando inicies sesión.
+      </div>
+
+      <button class="btn btn-danger w-100 mt-3" id="saveBtn">
+        <span data-i18n="save">Guardar</span>
       </button>
 
-      <a href="index.html" class="btn btn-link w-100 mt-2">Cancelar</a>
+      <a href="index.html" class="btn btn-link w-100 mt-2" data-i18n="cancel">
+        Cancelar
+      </a>
     </div>
 
     <script>
-      async function loadCurrentName() {
+      // ===== Page state =====
+      let currentUserEmail = null;
+
+      function applyTranslationsExtended(root = document) {
+        // texto normal + title + aria-label (ya lo hace i18n.js)
+        window.applyTranslations(root);
+
+        // placeholders
+        root.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+          const key = el.getAttribute("data-i18n-placeholder");
+          if (!key) return;
+          el.setAttribute("placeholder", window.t(key));
+        });
+
+        // <title> del documento
+        const titleEl = document.querySelector("title[data-i18n]");
+        if (titleEl)
+          document.title = window.t(titleEl.getAttribute("data-i18n"));
+      }
+
+      async function loadUserProfile() {
         const {
           data: { user },
+          error: authErr,
         } = await supabaseClient.auth.getUser();
 
-        const { data } = await supabaseClient
+        if (authErr) throw authErr;
+        if (!user) throw new Error(window.t("err_no_session"));
+
+        currentUserEmail = user.email;
+
+        const { data, error } = await supabaseClient
           .from("users")
-          .select("name")
+          .select("name, preferred_language")
           .eq("email", user.email)
           .single();
 
-        document.getElementById("nameInput").value = data.name;
+        if (error) throw error;
+
+        document.getElementById("nameInput").value = data?.name || "";
+
+        const pref = data?.preferred_language || "fr";
+        document.getElementById("preferredLang").value = pref;
+
+        // Aplicar idioma guardado como idioma de la UI
+        await window.setLang(pref);
+        document.documentElement.lang = pref;
+        document.getElementById("langSelect").value = pref;
+
+        applyTranslationsExtended();
       }
 
-      async function saveName() {
+      async function saveProfile() {
         const newName = document.getElementById("nameInput").value.trim();
+        const preferredLang = document.getElementById("preferredLang").value;
 
         if (newName.length < 2) {
-          showToast("El nombre debe tener al menos 2 caracteres.", "danger");
+          alert(window.t("name_min_len"));
           return;
         }
 
-        const {
-          data: { user },
-        } = await supabaseClient.auth.getUser();
+        if (!["fr", "en", "es"].includes(preferredLang)) {
+          alert(window.t("invalid_language"));
+          return;
+        }
 
         const { error } = await supabaseClient
           .from("users")
-          .update({ name: newName })
-          .eq("email", user.email);
+          .update({ name: newName, preferred_language: preferredLang })
+          .eq("email", currentUserEmail);
 
         if (error) {
           alert(error.message);
-        } else {
-          window.location.href = "index.html";
+          return;
         }
+
+        // Guardar el idioma también localmente para UX inmediata
+        await window.setLang(preferredLang);
+
+        window.location.href = "index.html";
       }
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        // Init i18n (fallback FR)
+        const lang = await window.initI18n(["fr", "en", "es"], "fr");
+
+        // Selector idioma (UI inmediata, NO guarda en DB)
+        const langSelect = document.getElementById("langSelect");
+        langSelect.value = lang;
+        langSelect.addEventListener("change", async (e) => {
+          const next = e.target.value;
+          await window.setLang(next);
+          document.documentElement.lang = next;
+          applyTranslationsExtended();
+        });
+
+        // Save button
+        document
+          .getElementById("saveBtn")
+          .addEventListener("click", saveProfile);
+
+        // Load profile + apply preferred language from DB
+        try {
+          await loadUserProfile();
+        } catch (err) {
+          console.error(err);
+          alert(err?.message || window.t("err_generic"));
+        }
+      });
     </script>
   </body>
 </html>

@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Race Register</title>
+
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
@@ -13,151 +14,82 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="css/index.css" />
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabaseClient.js"></script>
     <script src="js/auth.js"></script>
-    <style>
-      body {
-        display: none;
-        opacity: 0;
-        transition: opacity 0.25s ease;
-      }
 
-      .table-container {
-        overflow-x: auto;
-        max-height: 70vh;
-      }
-
-      table {
-        font-size: 0.75rem;
-      }
-
-      th,
-      td {
-        white-space: nowrap;
-      }
-
-      thead th {
-        position: sticky;
-        top: 0;
-        background: white;
-        z-index: 2;
-      }
-
-      .avatar-badge {
-        width: 34px;
-        height: 34px;
-        border-radius: 50%;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(220, 53, 69, 0.12);
-        color: #dc3545;
-        font-weight: 700;
-        font-size: 0.85rem;
-        user-select: none;
-      }
-      .bi-pencil-square:hover {
-        color: #dc3545;
-        transform: scale(1.1);
-        transition: 0.15s ease;
-      }
-    </style>
-    <style>
-      .cal-card {
-        border: 1px solid rgba(108, 117, 125, 0.25);
-        border-radius: 12px;
-        padding: 10px;
-        background: #fff;
-      }
-
-      .cal-title {
-        font-size: 0.85rem;
-        font-weight: 700;
-        margin-bottom: 6px;
-        color: #212529;
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-      }
-
-      .cal-title .year {
-        font-weight: 600;
-        color: #6c757d;
-        font-size: 0.8rem;
-      }
-
-      .cal-table {
-        width: 100%;
-        border-collapse: collapse;
-        table-layout: fixed;
-        font-size: 0.72rem;
-      }
-
-      .cal-table th,
-      .cal-table td {
-        text-align: center;
-        padding: 3px 0;
-        border-radius: 6px;
-      }
-
-      .cal-table th {
-        color: #6c757d;
-        font-weight: 700;
-        font-size: 0.65rem;
-      }
-
-      .cal-table td.muted {
-        color: rgba(108, 117, 125, 0.55);
-      }
-
-      .cal-table td.today {
-        background: rgba(220, 53, 69, 0.12);
-        color: #dc3545;
-        font-weight: 800;
-      }
-      .cal-scroll {
-        max-height: calc(
-          100vh - 140px
-        ); /* ajusta 140px a 120px si tu navbar es más alto */
-        overflow-y: auto;
-        padding-right: 6px; /* espacio para scrollbar */
-      }
-    </style>
+    <!-- i18n -->
+    <script src="js/i18n.js"></script>
   </head>
 
   <body data-page="protected">
     <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
       <div class="container-fluid">
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-3">
           <span class="navbar-brand fw-bold mb-0">Race Register</span>
+
           <span
             id="adminBadge"
             class="text-warning d-none"
+            data-i18n-title="admin_badge_title"
             title="Administrador"
           >
             <i class="bi bi-shield-lock-fill"></i>
           </span>
+
+          <span id="adminLink" class="d-none">
+            <a
+              href="event.html"
+              class="text-white text-decoration-none fw-semibold"
+              data-i18n="new_event"
+            >
+              Nuevo Evento
+            </a>
+          </span>
         </div>
-        <button class="btn btn-light btn-sm" onclick="logout()">
-          Cerrar sesión
-        </button>
+
+        <div class="d-flex align-items-center gap-2">
+          <!-- Selector idioma -->
+          <select
+            id="langSelect"
+            class="form-select form-select-sm w-auto"
+            aria-label="Idioma"
+            data-i18n-aria-label="language_aria"
+          >
+            <option value="fr">FR</option>
+            <option value="en">EN</option>
+            <option value="es">ES</option>
+          </select>
+
+          <button
+            class="btn btn-light btn-sm"
+            onclick="logout()"
+            data-i18n="logout"
+          >
+            Cerrar sesión
+          </button>
+        </div>
       </div>
     </nav>
 
     <div class="container mt-4">
       <h1 class="h4 d-flex align-items-center gap-2">
         <span id="avatar" class="avatar-badge">?</span>
+
         <span>
-          Bienvenido,
+          <span data-i18n="welcome">Bienvenido,</span>
           <span id="userName" class="fw-bold text-danger"></span>
         </span>
+
         <a
           href="edit_user.html"
           class="text-secondary"
           title="Editar perfil"
           aria-label="Editar perfil"
+          data-i18n-title="edit_profile"
+          data-i18n-aria-label="edit_profile"
         >
           <i class="bi bi-pencil-square"></i>
         </a>
@@ -182,118 +114,698 @@
           style="flex: 0 0 80%; max-width: 80%"
         >
           <div class="border rounded-3 p-3 bg-white" style="min-height: 70vh">
-            <!-- Por ahora en blanco -->
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <h5 class="mb-0" data-i18n="events_title">Eventos</h5>
+              <span
+                id="selectedDateBadge"
+                class="badge text-bg-light border d-none"
+              ></span>
+            </div>
+
+            <div id="eventsPanel" class="text-muted" data-i18n="events_hint">
+              Haz click en una fecha resaltada del calendario para ver los
+              eventos.
+            </div>
           </div>
         </section>
       </div>
     </div>
-  </body>
-  <script>
-    function monthNameEs(date) {
-      return new Intl.DateTimeFormat("es-CA", { month: "long" }).format(date);
-    }
 
-    function buildMonthCalendar(year, month, todayY, todayM, todayD) {
-      // month: 0-11
-      const first = new Date(year, month, 1);
-      const last = new Date(year, month + 1, 0);
-      const daysInMonth = last.getDate();
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-      // Queremos semana empezando lunes (L M X J V S D)
-      // JS getDay(): 0=Dom ... 6=Sáb
-      const jsDay = first.getDay(); // 0..6
-      const mondayIndex = (jsDay + 6) % 7; // 0=Lun .. 6=Dom
+    <script>
+      /**
+       * Index calendar + events integration (i18n-enabled)
+       * - Highlights days with events
+       * - Uses discipline colors: discipline.color + discipline.backgroundColor
+       * - Multiple disciplines per day: dots + tooltip
+       * - Right panel: cards with Interested/Registered + toggle for current user
+       */
 
-      const cal = document.createElement("div");
-      cal.className = "cal-card";
+      // ====== CONFIG ======
+      const START_OFFSET_MONTHS = -2;
+      const MONTH_COUNT = 14;
 
-      const title = document.createElement("div");
-      title.className = "cal-title";
-      const mName = monthNameEs(first);
-      title.innerHTML = `<span style="text-transform:capitalize">${mName}</span><span class="year">${year}</span>`;
-      cal.appendChild(title);
+      // ====== Utils ======
+      function toISODateLocal(dateObj) {
+        const y = dateObj.getFullYear();
+        const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+        const d = String(dateObj.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+      }
 
-      const table = document.createElement("table");
-      table.className = "cal-table";
+      function escapeHtml(str) {
+        return String(str ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
 
-      const thead = document.createElement("thead");
-      thead.innerHTML = `
-      <tr>
-        <th>L</th><th>M</th><th>X</th><th>J</th><th>V</th><th>S</th><th>D</th>
-      </tr>`;
-      table.appendChild(thead);
+      function currentLocale() {
+        // i18n.js expone getLang(); default: fr
+        const lang = (window.getLang && window.getLang()) || "fr";
+        // formatos útiles
+        if (lang === "es") return "es-CA";
+        if (lang === "en") return "en-CA";
+        return "fr-CA";
+      }
 
-      const tbody = document.createElement("tbody");
+      function monthNameLocalized(date) {
+        return new Intl.DateTimeFormat(currentLocale(), {
+          month: "long",
+        }).format(date);
+      }
 
-      let day = 1;
-      for (let row = 0; row < 6; row++) {
-        const tr = document.createElement("tr");
+      async function loadPreferredLanguageFromDB() {
+        const { data: auth, error: e0 } = await (
+          window.supabase || window.supabaseClient
+        ).auth.getUser();
+        if (e0) return null;
+        const user = auth?.user;
+        if (!user?.email) return null;
 
-        for (let col = 0; col < 7; col++) {
-          const td = document.createElement("td");
+        const { data, error } = await (window.supabase || window.supabaseClient)
+          .from("users")
+          .select("preferred_language")
+          .eq("email", user.email)
+          .single();
 
-          // Celdas vacías antes del 1er día
-          if (row === 0 && col < mondayIndex) {
-            td.textContent = "";
-            td.className = "muted";
-          } else if (day > daysInMonth) {
-            td.textContent = "";
-            td.className = "muted";
-          } else {
-            td.textContent = String(day);
+        if (error) return null;
+        return data?.preferred_language || null;
+      }
 
-            // Resaltar hoy
-            if (year === todayY && month === todayM && day === todayD) {
-              td.classList.add("today");
-            }
+      // ===== Auth helper =====
+      async function getCurrentAuthUserId() {
+        const { data, error } = await window.supabase.auth.getUser();
+        if (error) throw error;
+        return data?.user?.id || null;
+      }
 
-            day++;
-          }
+      // ===== Participation =====
+      async function fetchParticipationForEvents(eventIds) {
+        const me = await getCurrentAuthUserId();
+        if (!me) throw new Error(window.t("err_no_session"));
 
-          tr.appendChild(td);
+        if (!eventIds || eventIds.length === 0) {
+          return { byEvent: new Map(), me };
         }
 
-        tbody.appendChild(tr);
+        const { data: links, error: e1 } = await window.supabase
+          .from("events_by_user")
+          .select("event_id, auth_user_id, interested, registered")
+          .in("event_id", eventIds);
 
-        // Si ya terminamos los días del mes, salimos
-        if (day > daysInMonth) break;
-      }
+        if (e1) throw e1;
 
-      table.appendChild(tbody);
-      cal.appendChild(table);
-
-      return cal;
-    }
-
-    function renderNextCalendars(count = 14) {
-      const container = document.getElementById("calendars");
-      if (!container) return;
-
-      container.innerHTML = "";
-
-      const now = new Date();
-      const todayY = now.getFullYear();
-      const todayM = now.getMonth();
-      const todayD = now.getDate();
-      const startOffset = -2;
-      for (let i = 0; i < count; i++) {
-        const d = new Date(todayY, todayM + startOffset + i, 1);
-
-        const cal = buildMonthCalendar(
-          d.getFullYear(),
-          d.getMonth(),
-          todayY,
-          todayM,
-          todayD,
+        const authIds = Array.from(
+          new Set((links || []).map((r) => r.auth_user_id)),
         );
-        container.appendChild(cal);
-      }
-    }
 
-    // Renderizar cuando la página esté visible (ya autenticada)
-    document.addEventListener("DOMContentLoaded", () => {
-      // Si tu auth oculta body hasta sesión, esto corre igual.
-      renderNextCalendars(14);
-    });
-  </script>
+        // Obtener nombres (si no hay, cae a email o uuid corto)
+        let usersMap = new Map();
+        if (authIds.length) {
+          const { data: users, error: e2 } = await window.supabase
+            .from("users")
+            .select("auth_user_id, email, name")
+            .in("auth_user_id", authIds);
+
+          if (!e2 && users) {
+            usersMap = new Map(
+              users.map((u) => [
+                u.auth_user_id,
+                u.name || u.email || u.auth_user_id,
+              ]),
+            );
+          } else {
+            usersMap = new Map(authIds.map((id) => [id, id.slice(0, 8)]));
+          }
+        }
+
+        const byEvent = new Map();
+
+        for (const row of links || []) {
+          const eid = row.event_id;
+
+          if (!byEvent.has(eid)) {
+            byEvent.set(eid, {
+              interested: [],
+              registered: [],
+              me: { interested: false, registered: false },
+            });
+          }
+
+          const bucket = byEvent.get(eid);
+          const display =
+            usersMap.get(row.auth_user_id) || row.auth_user_id?.slice(0, 8);
+
+          if (row.interested) bucket.interested.push(display);
+          if (row.registered) bucket.registered.push(display);
+
+          if (row.auth_user_id === me) {
+            bucket.me = {
+              interested: !!row.interested,
+              registered: !!row.registered,
+            };
+          }
+        }
+
+        for (const eid of eventIds) {
+          if (!byEvent.has(eid)) {
+            byEvent.set(eid, {
+              interested: [],
+              registered: [],
+              me: { interested: false, registered: false },
+            });
+          }
+        }
+
+        return { byEvent, me };
+      }
+
+      async function upsertMyParticipation(
+        eventId,
+        nextInterested,
+        nextRegistered,
+      ) {
+        const me = await getCurrentAuthUserId();
+        if (!me) throw new Error(window.t("err_no_session"));
+
+        const payload = {
+          event_id: eventId,
+          auth_user_id: me,
+          interested: !!nextInterested,
+          registered: !!nextRegistered,
+        };
+
+        const { error } = await window.supabase
+          .from("events_by_user")
+          .upsert(payload, { onConflict: "event_id,auth_user_id" });
+
+        if (error) throw error;
+      }
+
+      // ===== Right panel render =====
+      let selectedDateISO = null;
+      let lastEventsForDate = [];
+      let lastDisciplinesById = new Map();
+
+      async function renderEventsForDate(isoDate, events, disciplinesById) {
+        selectedDateISO = isoDate;
+        lastEventsForDate = events || [];
+        lastDisciplinesById = disciplinesById || new Map();
+
+        const panel = document.getElementById("eventsPanel");
+        const badge = document.getElementById("selectedDateBadge");
+
+        if (badge) {
+          badge.classList.remove("d-none");
+          badge.textContent = isoDate;
+        }
+
+        if (!events || events.length === 0) {
+          panel.innerHTML = `
+            <div class="alert alert-light border mb-0">
+              ${escapeHtml(window.t("no_events_for_date"))}
+              <strong>${escapeHtml(isoDate)}</strong>.
+            </div>`;
+          return;
+        }
+
+        const eventIds = events.map((e) => e.id);
+        const { byEvent } = await fetchParticipationForEvents(eventIds);
+
+        const cards = events
+          .map((e) => {
+            const d = disciplinesById.get(e.discipline_id);
+            const discName = d?.name ?? e.discipline_id ?? "—";
+            const color = d?.color || "#6c757d";
+            const bg = d?.backgroundColor || "#f8f9fa";
+
+            const website = e.website
+              ? `<a href="${escapeHtml(e.website)}" target="_blank" rel="noopener">${escapeHtml(window.t("website"))}</a>`
+              : `<span class="text-muted">—</span>`;
+
+            const desc = e.description
+              ? escapeHtml(e.description)
+              : `<span class="text-muted">—</span>`;
+
+            const p = byEvent.get(e.id) || {
+              interested: [],
+              registered: [],
+              me: { interested: false, registered: false },
+            };
+
+            const interestedChips = p.interested.length
+              ? `<div class="event-chip-list">${p.interested
+                  .map(
+                    (n) => `<span class="event-chip">${escapeHtml(n)}</span>`,
+                  )
+                  .join("")}</div>`
+              : `<div class="text-muted small">${escapeHtml(window.t("nobody_yet"))}</div>`;
+
+            const registeredChips = p.registered.length
+              ? `<div class="event-chip-list">${p.registered
+                  .map(
+                    (n) => `<span class="event-chip">${escapeHtml(n)}</span>`,
+                  )
+                  .join("")}</div>`
+              : `<div class="text-muted small">${escapeHtml(window.t("nobody_yet"))}</div>`;
+
+            const interestedBtnLabel = p.me.interested
+              ? window.t("remove_me")
+              : window.t("im_interested");
+
+            const registeredBtnLabel = p.me.registered
+              ? window.t("remove_me")
+              : window.t("register_me");
+
+            return `
+              <div class="card shadow-sm mb-3 event-card" data-event-id="${e.id}">
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-12 col-lg-6">
+                      <div class="d-flex align-items-start justify-content-between gap-2">
+                        <div>
+                          <div class="fw-bold">${escapeHtml(e.name || "")}</div>
+                          <div class="meta">
+                            <span class="badge" style="background:${escapeHtml(bg)}; color:${escapeHtml(color)}; border:1px solid ${escapeHtml(color)};">
+                              ${escapeHtml(discName)}
+                            </span>
+                            <span class="text-muted ms-2">${escapeHtml(e.event_date || "")}</span>
+                          </div>
+                        </div>
+                        <div class="text-end small">${website}</div>
+                      </div>
+                      <div class="mt-2 small">${desc}</div>
+                    </div>
+
+                    <div class="col-12 col-lg-3">
+                      <div class="event-col-title">${escapeHtml(window.t("interested"))}</div>
+                      ${interestedChips}
+                      <div class="mt-2">
+                        <button
+                          class="btn btn-sm ${p.me.interested ? "btn-outline-secondary" : "btn-outline-primary"}"
+                          data-action="toggle-interested"
+                          data-event-id="${e.id}"
+                        >
+                          ${escapeHtml(interestedBtnLabel)}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="col-12 col-lg-3">
+                      <div class="event-col-title">${escapeHtml(window.t("registered"))}</div>
+                      ${registeredChips}
+                      <div class="mt-2">
+                        <button
+                          class="btn btn-sm ${p.me.registered ? "btn-outline-secondary" : "btn-outline-success"}"
+                          data-action="toggle-registered"
+                          data-event-id="${e.id}"
+                        >
+                          ${escapeHtml(registeredBtnLabel)}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>`;
+          })
+          .join("");
+
+        panel.innerHTML = cards;
+      }
+
+      // Event delegation (toggle)
+      document.addEventListener("DOMContentLoaded", () => {
+        const panel = document.getElementById("eventsPanel");
+        if (!panel) return;
+
+        panel.addEventListener("click", async (ev) => {
+          const btn = ev.target.closest("button[data-action][data-event-id]");
+          if (!btn) return;
+
+          const action = btn.dataset.action;
+          const eventId = Number(btn.dataset.eventId);
+
+          try {
+            btn.disabled = true;
+
+            const { byEvent } = await fetchParticipationForEvents([eventId]);
+            const current = byEvent.get(eventId) || {
+              me: { interested: false, registered: false },
+            };
+
+            let nextInterested = current.me.interested;
+            let nextRegistered = current.me.registered;
+
+            if (action === "toggle-interested") {
+              nextInterested = !current.me.interested;
+            } else if (action === "toggle-registered") {
+              nextRegistered = !current.me.registered;
+            } else {
+              return;
+            }
+
+            await upsertMyParticipation(
+              eventId,
+              nextInterested,
+              nextRegistered,
+            );
+            await renderEventsForDate(
+              selectedDateISO,
+              lastEventsForDate,
+              lastDisciplinesById,
+            );
+          } catch (err) {
+            console.error(err);
+            alert(err?.message || window.t("err_generic"));
+          } finally {
+            btn.disabled = false;
+          }
+        });
+      });
+
+      // ===== Calendar data fetch =====
+      async function fetchDisciplinesMapFull() {
+        const { data, error } = await window.supabase
+          .from("sport_discipline")
+          .select("id, name, color, backgroundColor")
+          .order("name", { ascending: true });
+
+        if (error) {
+          console.error("Error loading sport_discipline:", error);
+          return new Map();
+        }
+
+        const map = new Map();
+        for (const row of data || []) {
+          map.set(row.id, {
+            name: row.name,
+            color: row.color || "#6c757d",
+            backgroundColor: row.backgroundColor || "#f8f9fa",
+          });
+        }
+        return map;
+      }
+
+      async function fetchEventsInRange(startISO, endISO) {
+        const { data, error } = await window.supabase
+          .from("events")
+          .select("id, name, event_date, description, discipline_id, website")
+          .gte("event_date", startISO)
+          .lte("event_date", endISO)
+          .order("event_date", { ascending: true })
+          .order("name", { ascending: true });
+
+        if (error) {
+          console.error("fetchEventsInRange error:", error);
+          return [];
+        }
+        return data || [];
+      }
+
+      function buildEventsIndex(events) {
+        const eventsByDate = new Map();
+        const disciplineIdsByDate = new Map();
+
+        for (const e of events) {
+          const date = e.event_date;
+          if (!date) continue;
+
+          if (!eventsByDate.has(date)) eventsByDate.set(date, []);
+          eventsByDate.get(date).push(e);
+
+          if (!disciplineIdsByDate.has(date))
+            disciplineIdsByDate.set(date, new Set());
+          if (e.discipline_id != null)
+            disciplineIdsByDate.get(date).add(e.discipline_id);
+        }
+
+        return { eventsByDate, disciplineIdsByDate };
+      }
+
+      // ===== Calendar building =====
+      function clearSelectedCalendarCell() {
+        document.querySelectorAll(".cal-table td.selected").forEach((el) => {
+          el.classList.remove("selected");
+        });
+      }
+
+      function buildMonthCalendar(
+        year,
+        month,
+        todayY,
+        todayM,
+        todayD,
+        disciplineIdsByDate,
+        disciplinesById,
+      ) {
+        const first = new Date(year, month, 1);
+        const last = new Date(year, month + 1, 0);
+        const daysInMonth = last.getDate();
+
+        const jsDay = first.getDay(); // 0=Sun..6=Sat
+        const mondayIndex = (jsDay + 6) % 7; // 0=Mon..6=Sun
+
+        const cal = document.createElement("div");
+        cal.className = "cal-card";
+
+        const title = document.createElement("div");
+        title.className = "cal-title";
+        const mName = monthNameLocalized(first);
+        title.innerHTML = `<span style="text-transform:capitalize">${escapeHtml(mName)}</span><span class="year">${year}</span>`;
+        cal.appendChild(title);
+
+        const table = document.createElement("table");
+        table.className = "cal-table";
+
+        const thead = document.createElement("thead");
+        thead.innerHTML = `
+          <tr>
+            <th>${escapeHtml(window.t("dow_mon"))}</th>
+            <th>${escapeHtml(window.t("dow_tue"))}</th>
+            <th>${escapeHtml(window.t("dow_wed"))}</th>
+            <th>${escapeHtml(window.t("dow_thu"))}</th>
+            <th>${escapeHtml(window.t("dow_fri"))}</th>
+            <th>${escapeHtml(window.t("dow_sat"))}</th>
+            <th>${escapeHtml(window.t("dow_sun"))}</th>
+          </tr>`;
+        table.appendChild(thead);
+
+        const tbody = document.createElement("tbody");
+
+        let day = 1;
+        for (let row = 0; row < 6; row++) {
+          const tr = document.createElement("tr");
+
+          for (let col = 0; col < 7; col++) {
+            const td = document.createElement("td");
+
+            if (row === 0 && col < mondayIndex) {
+              td.textContent = "";
+              td.className = "muted";
+            } else if (day > daysInMonth) {
+              td.textContent = "";
+              td.className = "muted";
+            } else {
+              td.textContent = String(day);
+
+              if (year === todayY && month === todayM && day === todayD) {
+                td.classList.add("today");
+              }
+
+              const cellDate = new Date(year, month, day);
+              const iso = toISODateLocal(cellDate);
+              td.dataset.date = iso;
+
+              const set = disciplineIdsByDate?.get(iso);
+              if (set && set.size > 0) {
+                td.classList.add("has-event");
+
+                const ids = Array.from(set);
+                const discs = ids
+                  .map((id) => disciplinesById.get(id))
+                  .filter(Boolean);
+
+                const tooltipText =
+                  discs.length === 0
+                    ? window.t("events_title")
+                    : discs.map((d) => d.name).join(" • ");
+
+                td.setAttribute("data-bs-toggle", "tooltip");
+                td.setAttribute("data-bs-title", tooltipText);
+
+                if (discs.length === 1) {
+                  const d = discs[0];
+                  td.style.backgroundColor = d.backgroundColor;
+                  td.style.border = `1px solid ${d.color}`;
+                  td.style.color = d.color;
+                } else {
+                  td.style.backgroundColor = "#f8f9fa";
+                  td.style.border = "1px solid rgba(0,0,0,0.12)";
+
+                  const dots = document.createElement("div");
+                  dots.className = "event-dots";
+
+                  const used = new Set();
+                  for (const d of discs) {
+                    if (!d?.color || used.has(d.color)) continue;
+                    used.add(d.color);
+
+                    const dot = document.createElement("span");
+                    dot.className = "event-dot";
+                    dot.style.backgroundColor = d.color;
+                    dots.appendChild(dot);
+                  }
+                  td.appendChild(dots);
+                }
+              }
+
+              day++;
+            }
+
+            tr.appendChild(td);
+          }
+
+          tbody.appendChild(tr);
+          if (day > daysInMonth) break;
+        }
+
+        table.appendChild(tbody);
+        cal.appendChild(table);
+
+        return cal;
+      }
+
+      function initTooltips(rootEl = document) {
+        rootEl.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
+          const existing = bootstrap.Tooltip.getInstance(el);
+          if (existing) existing.dispose();
+          new bootstrap.Tooltip(el);
+        });
+      }
+
+      // ===== Main orchestration =====
+      async function renderCalendarsWithEvents(count = MONTH_COUNT) {
+        const container = document.getElementById("calendars");
+        if (!container) return;
+
+        container.innerHTML = "";
+
+        const now = new Date();
+        const todayY = now.getFullYear();
+        const todayM = now.getMonth();
+        const todayD = now.getDate();
+
+        const startMonthDate = new Date(
+          todayY,
+          todayM + START_OFFSET_MONTHS,
+          1,
+        );
+        const endMonthDate = new Date(
+          todayY,
+          todayM + START_OFFSET_MONTHS + (count - 1),
+          1,
+        );
+
+        const rangeStart = new Date(
+          startMonthDate.getFullYear(),
+          startMonthDate.getMonth(),
+          1,
+        );
+        const rangeEnd = new Date(
+          endMonthDate.getFullYear(),
+          endMonthDate.getMonth() + 1,
+          0,
+        );
+
+        const startISO = toISODateLocal(rangeStart);
+        const endISO = toISODateLocal(rangeEnd);
+
+        const [disciplinesById, events] = await Promise.all([
+          fetchDisciplinesMapFull(),
+          fetchEventsInRange(startISO, endISO),
+        ]);
+
+        const { eventsByDate, disciplineIdsByDate } = buildEventsIndex(events);
+
+        for (let i = 0; i < count; i++) {
+          const d = new Date(todayY, todayM + START_OFFSET_MONTHS + i, 1);
+          const cal = buildMonthCalendar(
+            d.getFullYear(),
+            d.getMonth(),
+            todayY,
+            todayM,
+            todayD,
+            disciplineIdsByDate,
+            disciplinesById,
+          );
+          container.appendChild(cal);
+        }
+
+        initTooltips(container);
+
+        // IMPORTANT: avoid stacking multiple listeners if re-rendering on language change
+        container.onclick = (ev) => {
+          const td = ev.target?.closest("td[data-date]");
+          if (!td) return;
+
+          const iso = td.dataset.date;
+
+          clearSelectedCalendarCell();
+          td.classList.add("selected");
+
+          const dayEvents = eventsByDate.get(iso) || [];
+          renderEventsForDate(iso, dayEvents, disciplinesById);
+        };
+      }
+
+      // ===== Language wiring =====
+      async function applyLanguageUI(lang) {
+        document.documentElement.lang = lang;
+        const sel = document.getElementById("langSelect");
+        if (sel) sel.value = lang;
+
+        // Aplica traducciones estáticas
+        window.applyTranslations();
+
+        // Re-render calendarios (para días de la semana + nombres de meses + tooltips)
+        await renderCalendarsWithEvents(MONTH_COUNT);
+
+        // Si hay fecha seleccionada, re-render del panel derecho (para labels)
+        if (selectedDateISO) {
+          await renderEventsForDate(
+            selectedDateISO,
+            lastEventsForDate,
+            lastDisciplinesById,
+          );
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        // Init i18n (fallback FR)
+        await window.initI18n(["fr", "en", "es"], "fr");
+
+        // Prefer DB language if available
+        const dbLang = await loadPreferredLanguageFromDB();
+        if (dbLang) await window.setLang(dbLang);
+
+        // Aplica UI + render
+        const lang = window.getLang();
+        const langSelect = document.getElementById("langSelect");
+        if (langSelect) {
+          langSelect.value = lang;
+          langSelect.addEventListener("change", async (e) => {
+            const next = e.target.value;
+            await window.setLang(next);
+            await applyLanguageUI(next);
+          });
+        }
+
+        await applyLanguageUI(lang);
+      });
+    </script>
+  </body>
 </html>

@@ -48,4 +48,4 @@ Each user can:
 - Register as **Registered**
 - Remove themselves
 
-Participation data stored in:
+

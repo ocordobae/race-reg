@@ -1,4 +1,4 @@
-# 🏁 Race Register
+# 🏁 Sport Team Events Calendar
 
 Race Register is a lightweight multi-language web application designed to manage sports events, participant interest, and registrations within a team or organization.
 
